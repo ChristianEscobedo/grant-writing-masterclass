@@ -5,16 +5,16 @@ import { Logo } from "./Logo";
 export const Footer = () => {
   const links = [
     {
-      name: "Pricing",
-      href: "/pricing",
-    },
-    {
-      name: "Blog",
-      href: "/blog",
-    },
-    {
       name: "Contact",
       href: "/contact",
+    },
+    {
+      name: "Masterclass",
+      href: "/masterclass",
+    },
+    {
+      name: "Register",
+      href: "/register",
     },
   ];
   const legal = [
