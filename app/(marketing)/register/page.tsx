@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
+import { useState } from "react";
 import {
   IconArrowRight,
   IconFileCheck,
@@ -70,8 +71,13 @@ export default function RegisterPage() {
     },
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   async function onSubmit(values: MasterclassRegistration) {
     try {
+      setIsSubmitting(true);
+      setErrorMessage("");
       console.log("submitted form", values);
 
       // Send the form data to our API endpoint
@@ -83,17 +89,21 @@ export default function RegisterPage() {
         body: JSON.stringify(values),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
         // Redirect to the thank you page using window.location for a full page reload
         window.location.href = "/register/thank-you";
       } else {
         // Handle error
-        console.error("Error submitting form:", await response.text());
-        alert("There was an error submitting your registration. Please try again.");
+        console.error("Error submitting form:", responseData);
+        setErrorMessage(responseData.message || "There was an error submitting your registration. Please try again.");
       }
     } catch (e) {
       console.error("Error submitting form:", e);
-      alert("There was an error submitting your registration. Please try again.");
+      setErrorMessage("There was an error submitting your registration. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -454,13 +464,32 @@ export default function RegisterPage() {
                       )}
                     />
 
+                    {errorMessage && (
+                      <div className="bg-red-50 dark:bg-red-900/30 p-3 rounded-lg border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-300 text-sm">
+                        {errorMessage}
+                      </div>
+                    )}
+
                     <div className="pt-4">
                       <Button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 flex items-center justify-center gap-2 text-base"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 flex items-center justify-center gap-2 text-base disabled:opacity-70 disabled:cursor-not-allowed"
                       >
-                        Save Your Seat
-                        <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        {isSubmitting ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            Save Your Seat
+                            <IconArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>
